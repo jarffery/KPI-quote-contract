@@ -28,7 +28,7 @@ class KPI(object):
             self.quote_sheet = self.data.sheet_by_name(self.quote_tab)
             self.contract_sheet = self.data.sheet_by_name(self.contract_tab)
         except Exception as e:
-            raise NameError (str(e), "please change your quote tab and contract tab into 'Quote' and 'Contract'!")
+            raise NameError ("please change your quote tab and contract tab into 'Quote' and 'Contract'!")
         self.quote_list = {}
         self.contract_list = {}
         for n in range(self.quote_sheet.nrows):
@@ -42,8 +42,7 @@ class KPI(object):
                                 self.quote_list.update(
                                     {app[0]: [xlrd.xldate_as_datetime(self.quote_sheet.row_values(n)[0],0), self.quote_sheet.row_values(n)[0]]})
                             except Exception as e:
-                                raise KeyError (
-                                    str(e), "Please change the data format in to month/day/year.")
+                                raise KeyError ("Please change the data format in to month/day/year.")
         for m in range(self.contract_sheet.nrows):
             self.contract_row_value = self.contract_sheet.row_values(m)
             if self.contract_row_value:
@@ -55,8 +54,7 @@ class KPI(object):
                                 self.contract_list.update(
                                     {app2[0]: [xlrd.xldate_as_datetime(self.contract_sheet.row_values(m)[0], 0), self.contract_sheet.row_values(m)[0]]})
                             except Exception as e:
-                                raise KeyError(
-                                    str(e), "Please change the data format in to month/day/year.")
+                                raise KeyError("Please change the data format in to month/day/year.")
     def KPI_calculate(self):
         self.Qn_contract_list = {}
         self.Qm_contract_list = {}
