@@ -178,24 +178,22 @@ class Application(tk.Frame):
         self.quoteinfotext.bind("<Tab>", self.focus_next)
         self.quoteinfotext.grid(column=0, row=1, columnspan=4)
 
-        self.label1 = tk.Label(
-            self, text='please input the name of your summary file', bg=self.bgColor)
-        self.label1.grid(column=0, row=2, columnspan=4)
-
         self.run = tk.Button(self, text='run',
                              command=self.main, highlightbackground=self.bgColor)
-        self.run.grid(column=3, row=11, columnspan=1)
-
-        #self.run = tk.Button(self, text='submit contract',
-        #                    command=self.main, highlightbackground=self.bgColor)
-        #self.run.grid(column=2, row=11, columnspan=1)
+        self.run.grid(column=3, row=14, columnspan=1)
+        tk.Label(self, bg=self.bgColor).grid(column=0, row=6, columnspan=4)
+        self.label2 = tk.Label(
+            self, text='TS name', bg=self.bgColor)
+        self.label2.grid(column=1, row=7, columnspan=1)
+        self.quoteinfotext2 = tk.Text(self, width=15, height=1)
+        self.quoteinfotext2.grid(column=2, row=7, columnspan=1)
 
         self.clear = tk.Button(
             self, text='Clear All', command=self.clearall, highlightbackground=self.bgColor)
-        self.clear.grid(column=0, row=11, columnspan=1)
+        self.clear.grid(column=0, row=14, columnspan=1)
 
         self.errorLabel = tk.Label(self, bg=self.bgColor, fg='red')
-        self.errorLabel.grid(column=0, row=12, columnspan=8)
+        self.errorLabel.grid(column=0, row=15, columnspan=8)
 
     def main(self):
         try:
@@ -206,7 +204,8 @@ class Application(tk.Frame):
         except (NameError, Exception) as e:
             raise self.errorLabel.config(text=str(e))
         try:
-            dir_name = os.path.split(file)[0]
+            #dir_name = os.path.split(file)[0]
+            dir_name = "C:/Egnyte/Private/project.managers/2. Technical support material/8. KPI calculator"
             dir_name = dir_name + "/report"
             os.mkdir(dir_name)
         except FileExistsError as e:
