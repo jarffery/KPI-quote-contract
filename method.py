@@ -16,6 +16,7 @@ import shutil
 class KPI(object):
     def __init__(self, file):
         self.file = file
+        #self.quarter = int(quarter_time)
     def open_excel(self):
         try:
             self.data = xlrd.open_workbook(r''.join(self.file))
@@ -91,12 +92,12 @@ class KPI(object):
         Q = [datetime(Q_year-1, 3, 31), datetime(Q_year-1, 6, 30), datetime(Q_year-1, 9, 30), datetime(Q_year-1, 12, 31)
              , datetime(Q_year, 3, 31), datetime(Q_year, 6, 30), datetime(Q_year, 9, 30), datetime(Q_year, 12, 31)]
         for n in range(4,8):
-            if datetime.now() <= Q[n] and datetime.now() > Q[n-1]:
-                self.quarter = 4 if n == 4 else n-4
-                self.last_quarter = 4 if (self.quarter - 1 == 0) else self.quarter - 1
+            if datetime.now() <= (Q[n] + timedelta(days = 10)) and datetime.now() > Q[n-1]:
+                self.quarter = n - 3
+                self.last_quarter = 4 if (self.quarter - 1 == 0) else (self.quarter - 1)
                 self.Qn_days = (Q[n]-Q[n-1]).days
                 for key, value in self.contract_list.items():
-                    if (value[0] <= Q[n-1]) and (value[0] > Q[n-2]):
+                    if (value[0] <= Q[n]) and (value[0] > Q[n-1]):
                         self.Qn_contract_list.update({key: value[1]})
                         if key in self.quote_list.keys():
                             self.Qn_contract_list[key] = self.contract_list[key][1] - self.quote_list[key][1]
@@ -107,8 +108,8 @@ class KPI(object):
                         else:
                             self.error_count += 1
                             self.error_list.update({key: value[1]})
-                    elif (value[0] <= Q[n-2]) and (value[0] > Q[n-3]):
-                        self.Qm_days = (Q[n-2]-Q[n-3]).days
+                    elif (value[0] <= Q[n-1]) and (value[0] > Q[n-2]):
+                        self.Qm_days = (Q[n-1]-Q[n-2]).days
                         self.Qm_contract_list.update({key: value[1]})
                         if key in self.quote_list.keys():
                             self.Qm_contract_list[key] = self.contract_list[key][1] - self.quote_list[key][1]
@@ -122,9 +123,9 @@ class KPI(object):
                     else:
                         pass
                 for key, value in self.quote_list.items():
-                    if (value[0] <= Q[n-1]) and (value[0] > Q[n-2]):
+                    if (value[0] <= Q[n]) and (value[0] > Q[n-1]):
                         self.Qn_quote_list.update({key: value[1]})
-                    elif (value[0] <= Q[n-2]) and (value[0] > Q[n-3]):
+                    elif (value[0] <= Q[n-1]) and (value[0] > Q[n-2]):
                         self.Qm_quote_list.update({key: value[1]})
                     else:
                         pass
@@ -188,6 +189,12 @@ class Application(tk.Frame):
         self.quoteinfotext2 = tk.Text(self, width=15, height=1)
         self.quoteinfotext2.grid(column=2, row=7, columnspan=1)
 
+        #self.label3 = tk.Label(
+        #    self, text='which quarter? (1-4)', bg=self.bgColor)
+        #self.label3.grid(column=1, row=9, columnspan=1)
+        #self.quoteinfotext2 = tk.Text(self, width=15, height=1)
+        #self.quoteinfotext2.grid(column=2, row=9, columnspan=1)
+
         self.clear = tk.Button(
             self, text='Clear All', command=self.clearall, highlightbackground=self.bgColor)
         self.clear.grid(column=0, row=14, columnspan=1)
@@ -198,6 +205,8 @@ class Application(tk.Frame):
     def main(self):
         try:
             file = str(self.quoteinfotext.get('1.0', 'end').strip().replace("\\", "/").replace("\1", "/1"))
+            TS_name = str(self.quoteinfotext2.get('1.0', 'end').strip())
+            #Quarter_time = int(self.quoteinfotext2.get('1.0', 'end'))
             a = KPI(file)
             a.open_excel()
             a.open_list()
@@ -205,8 +214,8 @@ class Application(tk.Frame):
             raise self.errorLabel.config(text=str(e))
         try:
             #dir_name = os.path.split(file)[0]
-            dir_name = "C:/Egnyte/Private/project.managers/2. Technical support material/8. KPI calculator"
-            dir_name = dir_name + "/report"
+            dir_name = os.path.split(file)[0]
+            dir_name = dir_name + "/report" + "-" + TS_name
             os.mkdir(dir_name)
         except FileExistsError as e:
             raise self.errorLabel.config(text=("Folder " + dir_name + " already exists"))
@@ -239,7 +248,7 @@ class Application(tk.Frame):
                     writer.writerow(["contract", "date"])
                     for key, value in a.error_list.items():
                         writer.writerow([key, value])
-                with open((dir_name + '/' + 'report.txt'), 'w') as f:
+                with open((dir_name + '/' + 'report-' + TS_name + '.txt'), 'w') as f:
                     f.write( 
                     "the output is last two quarter's details(based on the current time): \n\n\n"
                     "Quarter " + str(a.quarter) + '\n'
