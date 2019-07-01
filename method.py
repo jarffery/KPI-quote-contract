@@ -92,7 +92,7 @@ class KPI(object):
         Q = [datetime(Q_year-1, 3, 31), datetime(Q_year-1, 6, 30), datetime(Q_year-1, 9, 30), datetime(Q_year-1, 12, 31)
              , datetime(Q_year, 3, 31), datetime(Q_year, 6, 30), datetime(Q_year, 9, 30), datetime(Q_year, 12, 31)]
         for n in range(4,8):
-            if datetime.now() <= (Q[n] + timedelta(days = 10)) and datetime.now() > Q[n-1]:
+            if datetime.now() <= (Q[n] + timedelta(days = 10)) and datetime.now() > (Q[n-1] + timedelta(days = 10)):
                 self.quarter = n - 3
                 self.last_quarter = 4 if (self.quarter - 1 == 0) else (self.quarter - 1)
                 self.Qn_days = (Q[n]-Q[n-1]).days
