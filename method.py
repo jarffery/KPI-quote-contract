@@ -131,9 +131,15 @@ class KPI(object):
                         pass
             else:
                 pass
-        self.Pn = (self.Qn_contract_num + self.Qn_contract_num2*0.7)/len(self.Qn_quote_list)
-        self.Pm = (self.Qm_contract_num + self.Qm_contract_num2*0.7)/len(self.Qm_quote_list)
-
+        try:
+            self.Pn = (self.Qn_contract_num + self.Qn_contract_num2*0.7)/len(self.Qn_quote_list)
+        except ZeroDivisionError:
+            self.Pn = 0
+        try:
+            self.Pm = (self.Qm_contract_num + self.Qm_contract_num2*0.7)/len(self.Qm_quote_list)
+        except ZeroDivisionError:
+            self.Pm = 0
+            
 class Application(tk.Frame):
     def __init__(self, master=None):
         super().__init__(master)
