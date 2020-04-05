@@ -4,8 +4,6 @@ import xdrlib, sys, re
 import xlrd
 from xlrd import xldate_as_tuple
 import time
-import platform
-import tkinter as tk
 import csv
 from datetime import datetime
 from datetime import timedelta
@@ -14,25 +12,20 @@ import shutil
 # excel using 1900/1/1 as the first day
 
 class KPI(object):
-    def __init__(self, file):
-        self.file = file
+    def __init__(self, quote, contract):
+        self.quote_file = quote
+        self.contract_file = contract
         #self.quarter = int(quarter_time)
     def open_excel(self):
         try:
-            self.data = xlrd.open_workbook(r''.join(self.file))
-            return self.data
+            self.quote = xlrd.open_workbook(r''.join(self.quote_file))
+            self.contract = xlrd.open_workbook(r''.join(self.contract_file))
+            return self.quote, self.contract
         except Exception as e:
-            raise NameError (self.file + " cant' be found, please check your dir and try again")
+            raise NameError (self.quote + "or" + self.quote + " cant' be found, please check your dir and try again")
     def open_list(self):
-        for n in self.data.sheet_names():
-            if n.strip().lower() == "quote":
-                self.quote_tab = n
-            elif n.strip().lower() == "contract":
-                self.contract_tab = n
-            else:
-                pass
         try:
-            self.quote_sheet = self.data.sheet_by_name(self.quote_tab)
+            self.quote_sheet = self.quote.sheet_by_name(self.quote_tab)
             self.contract_sheet = self.data.sheet_by_name(self.contract_tab)
         except Exception as e:
             raise NameError ("please change your quote tab and contract tab into 'Quote' and 'Contract'!")
@@ -139,75 +132,7 @@ class KPI(object):
             self.Pm = (self.Qm_contract_num + self.Qm_contract_num2*0.7)/len(self.Qm_quote_list)
         except ZeroDivisionError:
             self.Pm = 0
-            
-class Application(tk.Frame):
-    def __init__(self, master=None):
-        super().__init__(master)
-        self.master = master 
-        self.grid(column=0, row=0)
-        self.bgColor = '#EEEEEE'
-        self.config(bg=self.bgColor, borderwidth=20)
-        self.create_widgets()
-        self.quoteinfotext.focus()
-        # bind shift-enter key to generate quotation
-        master.bind_all('<Shift-Return>', lambda e: self.main())
-
-    def paste_quote_text(self, event):
-        """
-        Binded function to paste clipboard content into Text, after striping
-        This is helpful to solve performance issues when a lot of \t are copied from excel
-        """
-        clipboard = self.clipboard_get()
-        self.quoteinfotext.insert('end', clipboard.strip())
-        return "break"
-
-    def focus_next(self, event):
-        """binded function that switch the focus to the next widget"""
-        event.widget.tk_focusNext().focus()
-        # return 'break' is a trick to stop the original functionality of the event
-        return "break"
-
-    def autoselect(self):
-        if self.rRNAremoval_check.get() == True:
-            self.library_type.set(True)
-        else:
-            self.library_type.get()
-
-    def create_widgets(self):
-        self.welcome = tk.Label(self, text='KPI calculator: quote and contract transfer rate\n please input the full path\n eg:"C:\Egnyte\Private\project.managers\\1. Quotation-PO\Jerry\Summary\Contract summary-Jerry.xlsx"',
-                                bg=self.bgColor)
-        self.welcome.grid(column=0, row=0, columnspan=4)
-
-        self.quoteinfotext = tk.Text(self, height=2)
-        if platform.system() == 'Darwin':
-            self.quoteinfotext.bind('<Command-v>', self.paste_quote_text)
-        self.quoteinfotext.bind('<Control-v>', self.paste_quote_text)
-        self.quoteinfotext.bind("<Tab>", self.focus_next)
-        self.quoteinfotext.grid(column=0, row=1, columnspan=4)
-
-        self.run = tk.Button(self, text='run',
-                             command=self.main, highlightbackground=self.bgColor)
-        self.run.grid(column=3, row=14, columnspan=1)
-        tk.Label(self, bg=self.bgColor).grid(column=0, row=6, columnspan=4)
-        self.label2 = tk.Label(
-            self, text='TS name', bg=self.bgColor)
-        self.label2.grid(column=1, row=7, columnspan=1)
-        self.quoteinfotext2 = tk.Text(self, width=15, height=1)
-        self.quoteinfotext2.grid(column=2, row=7, columnspan=1)
-
-        #self.label3 = tk.Label(
-        #    self, text='which quarter? (1-4)', bg=self.bgColor)
-        #self.label3.grid(column=1, row=9, columnspan=1)
-        #self.quoteinfotext2 = tk.Text(self, width=15, height=1)
-        #self.quoteinfotext2.grid(column=2, row=9, columnspan=1)
-
-        self.clear = tk.Button(
-            self, text='Clear All', command=self.clearall, highlightbackground=self.bgColor)
-        self.clear.grid(column=0, row=14, columnspan=1)
-
-        self.errorLabel = tk.Label(self, bg=self.bgColor, fg='red')
-        self.errorLabel.grid(column=0, row=15, columnspan=8)
-
+                     
     def main(self):
         try:
             file = str(self.quoteinfotext.get('1.0', 'end').strip().replace("\\", "/").replace("\1", "/1"))
@@ -288,16 +213,6 @@ class Application(tk.Frame):
             self.errorLabel.config(text=str("please find the qoute with wrong date format in the report folder, change your summary and try again"))
             raise
 
-
-    def clearall(self):
-        self.quoteinfotext.delete('1.0', 'end')
-        self.pricetext1.delete('1.0', 'end')
-        self.pricetext2.delete('1.0', 'end')
-        self.errorLabel.config(text='')
-
-root = tk.Tk()
-app = Application(master=root)
-app.mainloop()
 
 
 
